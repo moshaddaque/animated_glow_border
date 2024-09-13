@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AnimatedGlowBorder extends StatefulWidget {
-  final Widget child;
+  final Widget? child;
   final double borderWidth;
   final double borderRadius;
   final Duration animationDuration;
@@ -27,6 +27,8 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation1;
   late Animation<Color?> _colorAnimation2;
+  late Animation<Alignment> _tlAlignAnim;
+  late Animation<Alignment> _brAlignAnim;
 
   @override
   void initState() {
@@ -49,6 +51,72 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
       end: widget.startColor,
     ).animate(_controller);
     _controller.repeat();
+
+    _tlAlignAnim = TweenSequence<Alignment>(
+      [
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.topLeft,
+            end: Alignment.topRight,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.topRight,
+            end: Alignment.bottomRight,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.bottomRight,
+            end: Alignment.bottomLeft,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.bottomLeft,
+            end: Alignment.topLeft,
+          ),
+          weight: 1,
+        ),
+      ],
+    ).animate(_controller);
+
+    _brAlignAnim = TweenSequence<Alignment>(
+      [
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.bottomRight,
+            end: Alignment.bottomLeft,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.bottomLeft,
+            end: Alignment.topLeft,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.topLeft,
+            end: Alignment.topRight,
+          ),
+          weight: 1,
+        ),
+        TweenSequenceItem(
+          tween: Tween<Alignment>(
+            begin: Alignment.topRight,
+            end: Alignment.bottomRight,
+          ),
+          weight: 1,
+        ),
+      ],
+    ).animate(_controller);
   }
 
   @override
@@ -59,45 +127,98 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
 
   @override
   Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: _CenterCutPath(
-          radius: widget.borderRadius, thikness: widget.borderWidth),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Container(
-            decoration: BoxDecoration(
-              // borderRadius: widget.borderRadius,
-              border: Border.all(
-                width: widget.borderWidth,
-                color: Colors.transparent,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            widget.child != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
+                    child: widget.child,
+                  )
+                : const SizedBox.shrink(),
+            ClipPath(
+              clipper: _CenterCutPath(
+                  radius: widget.borderRadius, thikness: widget.borderWidth),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Stack(
+                    children: [
+                      Container(
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _colorAnimation1.value!.withOpacity(0.6),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                            )
+                          ],
+                        ),
+                      ),
+                      Align(
+                        alignment: _brAlignAnim.value,
+                        child: Container(
+                          width: constraints.maxWidth * 0.95,
+                          height: constraints.maxHeight * 0.95,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(widget.borderRadius),
+                            boxShadow: [
+                              BoxShadow(
+                                color: widget.endColor.withOpacity(0.3),
+                                offset: const Offset(0, 0),
+                                blurRadius: 20,
+                                spreadRadius: 1,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          // borderRadius: widget.borderRadius,
+                          border: Border.all(
+                            width: widget.borderWidth,
+                            color: Colors.transparent,
+                          ),
+                          gradient: LinearGradient(
+                            colors: [
+                              _colorAnimation1.value!,
+                              _colorAnimation2.value!,
+                            ],
+                            begin: _tlAlignAnim.value,
+                            end: _brAlignAnim.value,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _colorAnimation1.value!.withOpacity(0.6),
+                              blurRadius: 20,
+                              spreadRadius: 4,
+                            ),
+                            BoxShadow(
+                              color: _colorAnimation2.value!.withOpacity(0.6),
+                              blurRadius: 20,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: widget.child,
+                      ),
+                    ],
+                  );
+                },
+                child: widget.child,
               ),
-              gradient: LinearGradient(
-                colors: [
-                  _colorAnimation1.value!,
-                  _colorAnimation2.value!,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _colorAnimation1.value!.withOpacity(0.6),
-                  blurRadius: 20,
-                  spreadRadius: 4,
-                ),
-                BoxShadow(
-                  color: _colorAnimation2.value!.withOpacity(0.6),
-                  blurRadius: 20,
-                  spreadRadius: 4,
-                ),
-              ],
             ),
-            child: widget.child,
-          );
-        },
-        child: widget.child,
-      ),
+          ],
+        );
+      },
     );
   }
 }
