@@ -1,7 +1,7 @@
 name: animated_glow_border
 description: "A Flutter package that provides an animated gradient border with a glow effect."
 version: 0.0.1
-homepage:
+homepage: https://github.com/moshaddaque/animated_glow_border
 
 environment:
   sdk: ^3.5.0
