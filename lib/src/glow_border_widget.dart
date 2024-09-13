@@ -144,7 +144,8 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                         height: constraints.maxHeight,
                         decoration: BoxDecoration(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius:
+                              BorderRadius.circular(widget.borderRadius),
                           boxShadow: [
                             BoxShadow(
                               color: widget.startColor,
@@ -176,11 +177,8 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          // borderRadius: widget.borderRadius,
-                          border: Border.all(
-                            width: widget.borderWidth,
-                            color: Colors.transparent,
-                          ),
+                          borderRadius:
+                              BorderRadius.circular(widget.borderRadius),
                           gradient: LinearGradient(
                             colors: [
                               widget.startColor,
