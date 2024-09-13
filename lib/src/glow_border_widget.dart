@@ -4,6 +4,9 @@ class AnimatedGlowBorder extends StatefulWidget {
   final Widget? child;
   final double borderWidth;
   final double borderRadius;
+  final double blurRadius;
+  final double glowOpacity;
+  final double spreadRadius;
   final Duration animationDuration;
   final Color startColor;
   final Color endColor;
@@ -12,8 +15,11 @@ class AnimatedGlowBorder extends StatefulWidget {
     super.key,
     required this.child,
     this.borderWidth = 5.0,
-    this.borderRadius = 0,
-    this.animationDuration = const Duration(seconds: 3),
+    this.borderRadius = 10,
+    this.blurRadius = 10,
+    this.glowOpacity = 0.3,
+    this.spreadRadius = 1,
+    this.animationDuration = const Duration(milliseconds: 500),
     this.startColor = Colors.blue,
     this.endColor = Colors.purple,
   });
@@ -25,8 +31,6 @@ class AnimatedGlowBorder extends StatefulWidget {
 class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
   late Animation<Alignment> _tlAlignAnim;
   late Animation<Alignment> _brAlignAnim;
 
@@ -38,19 +42,7 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
     _controller = AnimationController(
       vsync: this,
       duration: widget.animationDuration,
-    )..repeat(reverse: true);
-
-    // Define color tween animations
-    _colorAnimation1 = ColorTween(
-      begin: widget.startColor,
-      end: widget.endColor,
-    ).animate(_controller);
-
-    _colorAnimation2 = ColorTween(
-      begin: widget.endColor,
-      end: widget.startColor,
-    ).animate(_controller);
-    _controller.repeat();
+    );
 
     _tlAlignAnim = TweenSequence<Alignment>(
       [
@@ -117,6 +109,8 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
         ),
       ],
     ).animate(_controller);
+
+    _controller.repeat();
   }
 
   @override
@@ -139,7 +133,7 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                 : const SizedBox.shrink(),
             ClipPath(
               clipper: _CenterCutPath(
-                  radius: widget.borderRadius, thikness: widget.borderWidth),
+                  radius: widget.borderRadius, thickness: widget.borderWidth),
               child: AnimatedBuilder(
                 animation: _controller,
                 builder: (context, child) {
@@ -153,9 +147,9 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                           borderRadius: BorderRadius.circular(30),
                           boxShadow: [
                             BoxShadow(
-                              color: _colorAnimation1.value!.withOpacity(0.6),
-                              blurRadius: 20,
-                              spreadRadius: 1,
+                              color: widget.startColor,
+                              blurRadius: widget.blurRadius,
+                              spreadRadius: widget.spreadRadius,
                             )
                           ],
                         ),
@@ -171,10 +165,10 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                                 BorderRadius.circular(widget.borderRadius),
                             boxShadow: [
                               BoxShadow(
-                                color: widget.endColor.withOpacity(0.3),
+                                color: widget.endColor,
                                 offset: const Offset(0, 0),
-                                blurRadius: 20,
-                                spreadRadius: 1,
+                                blurRadius: widget.blurRadius,
+                                spreadRadius: widget.spreadRadius,
                               )
                             ],
                           ),
@@ -189,24 +183,12 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
                           ),
                           gradient: LinearGradient(
                             colors: [
-                              _colorAnimation1.value!,
-                              _colorAnimation2.value!,
+                              widget.startColor,
+                              widget.endColor,
                             ],
                             begin: _tlAlignAnim.value,
                             end: _brAlignAnim.value,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _colorAnimation1.value!.withOpacity(0.6),
-                              blurRadius: 20,
-                              spreadRadius: 4,
-                            ),
-                            BoxShadow(
-                              color: _colorAnimation2.value!.withOpacity(0.6),
-                              blurRadius: 20,
-                              spreadRadius: 4,
-                            ),
-                          ],
                         ),
                         child: widget.child,
                       ),
@@ -225,11 +207,11 @@ class _AnimatedGlowBorderState extends State<AnimatedGlowBorder>
 
 class _CenterCutPath extends CustomClipper<Path> {
   final double radius;
-  final double thikness;
+  final double thickness;
 
   _CenterCutPath({
     this.radius = 0,
-    this.thikness = 1,
+    this.thickness = 1,
   });
 
   @override
@@ -240,15 +222,15 @@ class _CenterCutPath extends CustomClipper<Path> {
       size.width * 2,
       size.width * 2,
     );
-    final double width = size.width - thikness * 2;
-    final double height = size.height - thikness * 2;
+    final double width = size.width - thickness * 2;
+    final double height = size.height - thickness * 2;
 
     final path = Path()
       ..fillType = PathFillType.evenOdd
       ..addRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(thikness, thikness, width, height),
-          Radius.circular(radius - thikness),
+          Rect.fromLTWH(thickness, thickness, width, height),
+          Radius.circular(radius - thickness),
         ),
       )
       ..addRect(rect);
@@ -258,6 +240,6 @@ class _CenterCutPath extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant _CenterCutPath oldClipper) {
-    return oldClipper.radius != radius || oldClipper.thikness != thikness;
+    return oldClipper.radius != radius || oldClipper.thickness != thickness;
   }
 }
