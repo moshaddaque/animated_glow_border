@@ -14,39 +14,47 @@ and the Flutter guide for
 TODO: Put a short description of the package here that helps potential users
 know whether this package might be useful for them.
 
-# Animated Glow Border
+# AnimatedGlowBorder
 
-An easy-to-use Flutter package that provides an animated gradient border with a glow effect for any widget.
-
-## Installation
-
-Add the following to your `pubspec.yaml` file:
-
-```yaml
-dependencies:
-  animated_glow_border: ^0.0.1
-
+`AnimatedGlowBorder` is a customizable widget that provides an animated gradient border with a glowing effect.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **borderWidth**: The width of the animated gradient border.
+- **borderRadius**: The radius of the border, allowing for rounded corners.
+- **blurRadius**: The blur radius for the glow effect around the border.
+- **glowOpacity**: The opacity level of the glow effect.
+- **spreadRadius**: The spread radius of the glow around the border.
+- **animationDuration**: The duration of the gradient animation.
+- **startColor**: The starting color of the gradient.
+- **endColor**: The ending color of the gradient.
 
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+## Example Usage
 
 ```dart
-const like = 'sample';
-```
+import 'package:animated_glow_border/animated_glow_border.dart';
 
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedGlowBorder(
+      borderWidth: 4.0,
+      borderRadius: 12.0,
+      blurRadius: 10.0,
+      glowOpacity: 0.8,
+      spreadRadius: 5.0,
+      animationDuration: Duration(seconds: 2),
+      startColor: Colors.blue,
+      endColor: Colors.purple,
+      child: Container(
+        width: 200,
+        height: 200,
+        alignment: Alignment.center,
+        child: Text(
+          'Glow Border!',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
